@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1e3a5f">
+    <title>Local Volunteer Directory</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🤝%3C/text%3E%3C/svg%3E">
+    <script src="script.js" defer></script>
+    <script type="module" src="firebase-auth.js"></script>
+</head>
+<body>
+            <section id="landing" class="landing">
+        <nav class="landing-nav" aria-label="Main navigation">
+            <span class="landing-brand">🤝 Volunteer Directory</span>
+            <div class="landing-links">
+                <a href="#landingAbout">About</a>
+                <a href="#landingContact">Contact</a>
+            </div>
+        </nav>
+
+        <div class="landing-hero">
+            <div class="landing-hero-content">
+                <h1>Find local volunteers. <span class="landing-accent">Get help faster.</span></h1>
+                <p class="landing-tagline">Connect with volunteers in your local community. Search by skill, location and availability, and send a help request in a few clicks.</p>
+                <button type="button" id="getStartedBtn" class="button landing-btn">Get Started →</button>
+            </div>
+        </div>
+
+        <section id="landingAbout" class="landing-about">
+            <h2>About the directory</h2>
+            <p>Local Volunteer Directory is a simple place to list local volunteers with their skills, location and availability, so people in the community can find help quickly.</p>
+        </section>
+
+        <footer id="landingContact" class="landing-footer">
+            <p>Contact: yourname@example.com</p>
+            <p>Built to bring local communities together.</p>
+        </footer>
+    </section>
+
+    <div id="loginModal" class="modal-overlay" hidden>
+        <div class="modal-dialog login-dialog panel" role="dialog" aria-modal="true" aria-labelledby="loginHeading">
+            <div class="section-heading">
+                <h2 id="loginHeading">Login</h2>
+                <button type="button" id="closeLogin" class="button button-secondary">Close</button>
+            </div>
+            <p class="login-note">Sign in to manage volunteers and requests.</p>
+            <button type="button" id="googleLoginBtn" class="button button-primary login-full">Continue with Google</button>
+                        
+        </div>
+    </div>
+
+    <div id="appRoot" hidden>
+    <header class="site-header">
+                <div id="userBar" class="user-bar" hidden>
+            <img id="userPhoto" class="user-photo" alt="" referrerpolicy="no-referrer">
+            <span id="userName"></span>
+            <button type="button" id="logoutBtn" class="button user-logout">Logout</button>
+        </div>
+        <div class="header-content">
+            <p class="eyebrow">COMMUNITY CONNECTIONS</p>
+            <h1>Local Volunteer Directory</h1>
+            <p>Find and connect with volunteers in your community.</p>
+                                    <a class="header-cta" href="#" id="openAddBtn">+ Add a volunteer</a>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <section class="welcome" aria-labelledby="welcomeHeading">
+            <h2 id="welcomeHeading">Welcome!</h2>
+            <p>Find local volunteers by their skills, location, and availability—or add yourself to the directory.</p>
+        </section>
+
+        <section class="add-volunteer panel" aria-labelledby="formHeading">
+                       <div class="section-heading">
+                <div>
+                    <p class="eyebrow">DIRECTORY</p>
+                    <h2 id="formHeading">Add a volunteer</h2>
+                </div>
+                <button type="button" id="backToDirectoryBtn" class="button button-secondary">← Back to directory</button>
+            </div>
+
+            <form id="volunteerForm">
+                <div class="form-fields">
+                    <label class="field">
+                        <span>Volunteer name</span>
+                        <input type="text" id="volunteerName" placeholder="e.g. Jordan Lee" required maxlength="80">
+                    </label>
+
+                    <label class="field">
+                        <span>Location</span>
+                        <input type="text" id="volunteerLocation" placeholder="e.g. Downtown" required maxlength="100">
+                    </label>
+
+                    <label class="field field-wide">
+                        <span>Skills</span>
+                        <input type="text" id="volunteerSkills" placeholder="e.g. First aid, tutoring" required maxlength="200">
+                    </label>
+
+                    <fieldset class="availability-fieldset field-wide">
+                        <legend>Availability <span class="muted">(select at least one)</span></legend>
+                        <div id="availabilityOptions">
+                            <label class="availability-option"><input type="checkbox" name="availability" value="Morning"><span>Morning</span></label>
+                            <label class="availability-option"><input type="checkbox" name="availability" value="Afternoon"><span>Afternoon</span></label>
+                            <label class="availability-option"><input type="checkbox" name="availability" value="Evening"><span>Evening</span></label>
+                            <label class="availability-option"><input type="checkbox" name="availability" value="Night"><span>Night</span></label>
+                            <label class="availability-option"><input type="checkbox" name="availability" value="Weekdays"><span>Weekdays</span></label>
+                            <label class="availability-option"><input type="checkbox" name="availability" value="Weekends"><span>Weekends</span></label>
+                        </div>
+                        <small id="availabilityError" class="field-error" aria-live="polite"></small>
+                    </fieldset>
+
+                    <label class="field">
+                        <span>Status</span>
+                        <select id="volunteerStatus">
+                            <option value="Available">Available</option>
+                            <option value="Busy">Busy</option>
+                        </select>
+                    </label>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" id="addVolunteerBtn" class="button button-primary">Add Volunteer</button>
+                    <button type="button" id="cancelEditBtn" class="button button-secondary" hidden>Cancel edit</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="volunteer-section panel" aria-labelledby="directoryHeading">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">MEET YOUR COMMUNITY</p>
+                    <h2 id="directoryHeading">Volunteer directory</h2>
+                </div>
+                <span id="directoryCount" class="count-badge">0 volunteers</span>
+            </div>
+
+            <div class="filters">
+                <label class="field search-field">
+                    <span class="visually-hidden">Search volunteers</span>
+                    <input type="search" id="searchInput" placeholder="Search by name, location, or skill...">
+                </label>
+
+                <label class="field">
+                    <span class="visually-hidden">Filter by status</span>
+                    <select id="statusFilter">
+                        <option value="All">All statuses</option>
+                        <option value="Available">Available</option>
+                        <option value="Busy">Busy</option>
+                    </select>
+                </label>
+
+                <label class="field">
+                    <span class="visually-hidden">Filter by availability</span>
+                    <select id="availabilityFilter">
+                        <option value="All">All availability</option>
+                        <option value="Morning">Morning</option>
+                        <option value="Afternoon">Afternoon</option>
+                        <option value="Evening">Evening</option>
+                        <option value="Night">Night</option>
+                        <option value="Weekdays">Weekdays</option>
+                        <option value="Weekends">Weekends</option>
+                    </select>
+                </label>
+
+                <label class="field">
+                    <span class="visually-hidden">Sort volunteers</span>
+                    <select id="sortFilter">
+                        <option value="Default">Default order</option>
+                        <option value="nameAZ">Name A–Z</option>
+                        <option value="nameZA">Name Z–A</option>
+                        <option value="availableFirst">Available first</option>
+                        <option value="busyFirst">Busy first</option>
+                    </select>
+                </label>
+
+                <label class="favorite-filter">
+                    <input type="checkbox" id="favoriteFilter">
+                    <span>★ Favorites only</span>
+                </label>
+
+                <button type="button" id="clearFiltersBtn" class="button button-secondary">Clear filters</button>
+            </div>
+
+            <div class="volunteer-list" aria-live="polite"></div>
+        </section>
+
+        <section class="dashboard" aria-label="Directory dashboard">
+            <article class="dashboard-card">
+                <div class="dashboard-icon" aria-hidden="true">👥</div>
+                <div>
+                    <h2>Volunteers</h2>
+                    <p id="volunteerCount">0 volunteers</p>
+                </div>
+                <button type="button" id="viewVolunteersBtn" class="button button-secondary">View directory</button>
+            </article>
+
+            <article class="dashboard-card">
+                <div class="dashboard-icon" aria-hidden="true">📝</div>
+                <div>
+                    <h2>Requests</h2>
+                    <p id="requestCount">0 requests</p>
+                </div>
+                <button type="button" id="viewRequestsBtn" class="button button-secondary" aria-expanded="false" aria-controls="requestList">View requests</button>
+                <div id="requestList" class="dashboard-details" hidden></div>
+            </article>
+
+            <article class="dashboard-card">
+                <div class="dashboard-icon" aria-hidden="true">📊</div>
+                <div>
+                    <h2>Reports</h2>
+                    <p>Volunteer and request activity</p>
+                </div>
+                <button type="button" id="viewReportsBtn" class="button button-secondary" aria-expanded="false" aria-controls="reportBox">View reports</button>
+                <div id="reportBox" class="dashboard-details" hidden></div>
+            </article>
+        </section>
+
+              <section id="profileBox" class="profile-box modal-overlay" hidden>
+            <div class="modal-dialog panel" role="dialog" aria-modal="true" aria-labelledby="profileHeading">
+                <div class="section-heading">
+                    <h2 id="profileHeading">Volunteer profile</h2>
+                    <button type="button" id="closeProfile" class="button button-secondary">Close</button>
+                </div>
+                <div id="profileDetails"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>Built to bring local communities together.</p>
+    </footer>
+        </div>
+            <div id="confirmModal" class="modal-overlay" hidden>
+        <div class="modal-dialog confirm-dialog panel" role="alertdialog" aria-modal="true" aria-labelledby="confirmHeading" aria-describedby="confirmText">
+            <h2 id="confirmHeading">Delete volunteer?</h2>
+            <p id="confirmText" class="confirm-text"></p>
+            <div class="confirm-actions">
+                <button type="button" id="confirmCancelBtn" class="button button-secondary">Cancel</button>
+                <button type="button" id="confirmOkBtn" class="button button-delete-solid">Delete</button>
+            </div>
+        </div>
+    </div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
